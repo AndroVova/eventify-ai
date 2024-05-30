@@ -23,7 +23,7 @@ import app.constants as constants
 
 load_dotenv(find_dotenv())
 
-openai.api_key ="sk-proj-TUx8nL6DZUEi5HwHGWaHT3BlbkFJo2M0VyrgUpjTwIBlYqf7" #os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def message_to_dict(message):
     if isinstance(message, HumanMessage):
