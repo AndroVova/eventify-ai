@@ -1,0 +1,1 @@
+SYSTEM_INSTRUCTION = "app/prompts/system_prompt.txt"
