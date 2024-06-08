@@ -206,6 +206,7 @@ def fetch_events(result, conversation):
 def handle_chatbot_message(message, history=[]):
     result, updated_history, conversation = start_chat(message, history)
     final_response = result
+
     if "PROCESSING EVENTS" in result:
         events = fetch_events(result, conversation)
         print(events)
@@ -215,12 +216,18 @@ def handle_chatbot_message(message, history=[]):
             )
             try:
                 latest_message = AIMessage(content=apology_message)
-                updated_history.append(message_to_dict(latest_message))
+                if latest_message.content != "PROCESSING EVENTS":
+                    updated_history.append(message_to_dict(latest_message))
             except Exception as e:
                 print(f"Error appending message to history: {e}")
             final_response = apology_message
         else:
             final_response += "\n" + json.dumps(events)
+
+    updated_history = [
+        message for message in updated_history 
+        if message.get('content') != "PROCESSING EVENTS"
+    ]
 
     return {"response": final_response, "history": updated_history}
 
