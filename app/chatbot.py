@@ -129,7 +129,7 @@ def fetch_events(result, conversation):
 - Extracted Information:
   - Time: tomorrow (should return 2024-06-07T23:37:00)
   - Location: {{ pointY: 50.4501, pointX: 30.5234 }} (this Kyiv coordinates, dont add this comment)
-  - Type: concert, rock (this should be values from Event-Type Tags List)
+  - Type: concert, rock (this should be values from Event-Type Tags List, IMPORTANT take into account the case of letters)
 
 
 **Output:** Provide the extracted tags in JSON format.
@@ -139,7 +139,7 @@ def fetch_events(result, conversation):
 {{
     "date": "2024-06-07T23:37:00",
     "location": {{ "pointY": 50.4501, "pointX": 30.5234 }},
-    "tags": ["concert", "rock"]
+    "tags": ["concert", "Rock"]
 }}
 ```"""
     
@@ -194,7 +194,7 @@ def fetch_events(result, conversation):
         post_response = requests.post(post_url, json=extracted_info, headers=headers)
         post_response.raise_for_status()
         post_result = post_response.json()
-        print("POST Response:", post_result)
+        #print("POST Response:", post_result)
     except requests.RequestException as e:
         print(f"Failed to send POST request: {e}")
         return None
