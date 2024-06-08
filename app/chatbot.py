@@ -109,7 +109,6 @@ def get_tag_info(name):
         print(f"Failed to fetch info for tag '{name}'. Status code: {response.status_code}")
         return None
 
-# Основная функция для извлечения событий
 def fetch_events(result, conversation):
     tagsNames = get_tag_names()
     print("\n\n\nTags:", tagsNames)
@@ -147,7 +146,6 @@ def fetch_events(result, conversation):
     print("\n\n\nAnswer:", answer)
 
     try:
-        # Очистка строки от лишних данных
         match = re.search(r"\{.*\}", answer, re.DOTALL)
         if match:
             json_string = match.group(0)
@@ -158,7 +156,6 @@ def fetch_events(result, conversation):
         print(f"Failed to decode JSON from conversation.predict response: {e}")
         return None
     
-    # Обработка тегов
     if 'tags' in extracted_info:
         new_tags_structure = []
         for tag_name in extracted_info['tags']:
@@ -172,14 +169,11 @@ def fetch_events(result, conversation):
             else:
                 print(f"Tag '{tag_name}' not found or failed to decode.")
         
-        # Обновление структуры JSON с новой структурой тегов
         extracted_info['tags'] = new_tags_structure
 
-    # Добавление радиуса
-    extracted_info['radius'] = 100
+    extracted_info['radius'] = 1.5
     
     try:
-        # Преобразование обновленного объекта обратно в JSON строку для логирования
         json_answer = json.dumps(extracted_info)
     except (TypeError, ValueError) as e:
         print(f"Failed to encode updated JSON: {e}")
@@ -187,7 +181,6 @@ def fetch_events(result, conversation):
     
     print("\n\n\nUpdated JSON Answer:", json_answer)
     
-    # Отправка HTTP POST запроса
     post_url = "https://eventify-backend.azurewebsites.net/api/Ai/get-locations"
     headers = {'Content-Type': 'application/json'}
     try:
