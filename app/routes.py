@@ -11,7 +11,6 @@ def chatbot():
         message = data.get('message')
         history = data.get('history', [])
         
-        # Обработка сообщения чат-ботом
         response = handle_chatbot_message(message, history)
         app.logger.info(f"Chatbot response: {response}")
         
