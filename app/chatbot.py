@@ -109,38 +109,11 @@ def get_tag_info(name):
         print(f"Failed to fetch info for tag '{name}'. Status code: {response.status_code}")
         return None
 
-def fetch_events(result, conversation):
+def fetch_events(conversation):
     tagsNames = get_tag_names()
     print("\n\n\nTags:", tagsNames)
-    prompt = f"""You are a system designed to identify key elements (tags) in a user's request about an event they want to attend. Tags include temporal, locational, and event-type details.
-
-**Guidelines:**
-1. **Temporal option:** Use specific dates.
-2. **Locational option:** Return the location as coordinates for Google Maps.
-3. **Event-Type Tags:** Use the type of event.
-
-**Event-Type Tags List:** (list of all tags in database, you must use only them in Event-Type Tags)
-{tagsNames}
-
-**Example Prompt:**
-- Time: 2024-06-06T23:37:00
-- User: "I want to attend a rock concert near Kyiv tomorrow."
-- Extracted Information:
-  - Time: tomorrow (should return 2024-06-07T23:37:00)
-  - Location: {{ pointY: 50.4501, pointX: 30.5234 }} (this Kyiv coordinates, dont add this comment)
-  - Type: concert, rock (this should be values from Event-Type Tags List, IMPORTANT take into account the case of letters)
-
-
-**Output:** Provide the extracted tags in JSON format.
-
-**Example JSON Output:**
-```json
-{{
-    "date": "2024-06-07T23:37:00",
-    "location": {{ "pointY": 50.4501, "pointX": 30.5234 }},
-    "tags": ["concert", "Rock"]
-}}
-```"""
+    prompt = get_prompt_from_source(constants.TAG_FINDER)
+    prompt = prompt.format(tagsNames=tagsNames)
     
     answer = conversation.predict(input=prompt)
     print("\n\n\nAnswer:", answer)
@@ -173,21 +146,12 @@ def fetch_events(result, conversation):
 
     extracted_info['radius'] = 1.5
     
-    try:
-        json_answer = json.dumps(extracted_info)
-    except (TypeError, ValueError) as e:
-        print(f"Failed to encode updated JSON: {e}")
-        return None
-    
-    print("\n\n\nUpdated JSON Answer:", json_answer)
-    
     post_url = "https://eventify-backend.azurewebsites.net/api/Ai/get-locations"
     headers = {'Content-Type': 'application/json'}
     try:
         post_response = requests.post(post_url, json=extracted_info, headers=headers)
         post_response.raise_for_status()
         post_result = post_response.json()
-        #print("POST Response:", post_result)
     except requests.RequestException as e:
         print(f"Failed to send POST request: {e}")
         return None
@@ -200,12 +164,11 @@ def handle_chatbot_message(message, history=[]):
     result, updated_history, conversation = start_chat(message, history)
     final_response = result
 
-    if "PROCESSING EVENTS" in result:
-        events = fetch_events(result, conversation)
-        print(events)
+    if "PROCESSING EVENTS" in result or "ПРОЦЕСС ОБРАБОТКИ СОБЫТИЙ" in result:
+        events = fetch_events(conversation)
         if not events:
             apology_message = conversation.predict(
-                input="""write a very short message that you are sorry for not finding the event for the user. Ask user to give you new date answer in language the user firstly have spoken."""
+                input="""write a very short message that you are sorry for not finding the event for the user. Ask user to give you new date or tag. answer in language the user firstly have spoken."""
             )
             try:
                 latest_message = AIMessage(content=apology_message)
@@ -215,12 +178,17 @@ def handle_chatbot_message(message, history=[]):
                 print(f"Error appending message to history: {e}")
             final_response = apology_message
         else:
-            final_response += "\n" + json.dumps(events)
+            success_message = conversation.predict(
+                input="""write a very short message that you have found an event. Answer in language the user firstly have spoken."""
+            )
+            print('\n')
+            final_response += success_message + "\n" + json.dumps(events)
 
     updated_history = [
         message for message in updated_history 
         if message.get('content') != "PROCESSING EVENTS"
     ]
+    print(final_response)
 
     return {"response": final_response, "history": updated_history}
 
