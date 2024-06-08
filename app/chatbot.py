@@ -165,6 +165,8 @@ def handle_chatbot_message(message, history=[]):
     final_response = result
 
     if "PROCESSING EVENTS" in result or "ПРОЦЕСС ОБРАБОТКИ СОБЫТИЙ" in result:
+        if "ПРОЦЕСС ОБРАБОТКИ СОБЫТИЙ" in result:
+            result = result.replace("ПРОЦЕСС ОБРАБОТКИ СОБЫТИЙ", "PROCESSING EVENTS")
         events = fetch_events(conversation)
         if not events:
             apology_message = conversation.predict(
