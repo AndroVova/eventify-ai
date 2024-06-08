@@ -70,7 +70,7 @@ def set_chat_environment(history=[]):
         ]
     )
 
-    model = "gpt-3.5-turbo-0125"
+    model = "gpt-4o-2024-05-13"
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     llm = ChatOpenAI(
         temperature=0.3, model=model, callback_manager=callback_manager, streaming=True
