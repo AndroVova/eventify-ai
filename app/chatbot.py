@@ -111,6 +111,7 @@ def get_tag_info(name):
 
 def fetch_events(conversation):
     tagsNames = get_tag_names()
+    tagsNames = tagsNames.replace(" ", ", ")
     print("\n\n\nTags:", tagsNames)
     prompt = get_prompt_from_source(constants.TAG_FINDER)
     prompt = prompt.format(tagsNames=tagsNames)
